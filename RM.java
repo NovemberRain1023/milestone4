@@ -28,7 +28,7 @@ public class RM {
     }
 
     public RM() {
-        new ServiceTask(null).printLiveServer();
+        printLiveServer();
     }
 
     private void startService() {
@@ -40,6 +40,7 @@ public class RM {
                 while(true){
                     connect = service.accept();
                     System.out.println("service accept***********");
+                    printLiveServer();
                     ServiceTask serviceTask = new ServiceTask(connect);
                     pool.execute(serviceTask);
                 }
@@ -126,30 +127,31 @@ public class RM {
             }
         }
 
-        private void printLiveServer() {
-            StringBuffer stringBuffer = new StringBuffer();
-            if (isServer1Live) {
-                if (stringBuffer.length() != 0) {
-                    stringBuffer.append(", ");
-                }
-                stringBuffer.append("S1");
-            }
-            if (isServer2Live) {
-                if (stringBuffer.length() != 0) {
-                    stringBuffer.append(", ");
-                }
-                stringBuffer.append("S2");
-            }
-            if (isServer3Live) {
-                if (stringBuffer.length() != 0) {
-                    stringBuffer.append(", ");
-                }
-                stringBuffer.append("S3");
-            }
+        
+    }
+    private void printLiveServer() {
+        StringBuffer stringBuffer = new StringBuffer();
+        if (isServer1Live) {
             if (stringBuffer.length() != 0) {
-                stringBuffer.append(".");
+                stringBuffer.append(", ");
             }
-            System.out.println("GFD: " + serverNumber + " members: " + stringBuffer.toString());
+            stringBuffer.append("S1");
         }
+        if (isServer2Live) {
+            if (stringBuffer.length() != 0) {
+                stringBuffer.append(", ");
+            }
+            stringBuffer.append("S2");
+        }
+        if (isServer3Live) {
+            if (stringBuffer.length() != 0) {
+                stringBuffer.append(", ");
+            }
+            stringBuffer.append("S3");
+        }
+        if (stringBuffer.length() != 0) {
+            stringBuffer.append(".");
+        }
+        System.out.println("RM: " + serverNumber + " members: " + stringBuffer.toString());
     }
 }

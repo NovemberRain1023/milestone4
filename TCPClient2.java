@@ -2,6 +2,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
@@ -29,10 +30,14 @@ public class TCPClient2 {
         SimpleDateFormat format = new SimpleDateFormat("hh-MM-ss");
         Communicate thread1 = new Communicate(socketClient1);
         thread1.start();
+        Communicate thread2 = new Communicate(socketClient2);
+        Communicate thread3 = new Communicate(socketClient3);
+        thread2.start();
+        thread3.start();
   
         while (true) {
             
-            String msg = scanner.nextLine() + "with time: " + format.format(new Date());
+            String msg = scanner.nextLine() + " with time: " + format.format(new Date());
             if("#".equals(msg))
                 break;
             msg = msg+ " with client 4" + TCPService.END_CHAR;
@@ -44,8 +49,63 @@ public class TCPClient2 {
                 out1.write(msg.getBytes());
             } catch (IOException e) {
                 // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+                if (!socketClient1.isClosed()) {
+                    try {
+                        socketClient1.close();
+                    } catch (IOException e1) {
+                        // TODO Auto-generated catch block  
+                    }
+                }
+                try {
+                    socketClient1 = new Socket(TCPService.SERVICE_IP, TCPService.SERVICE_PORT_Client);
+                } catch (UnknownHostException e1) {
+                } catch (IOException e1) {
+                }
+                thread1 = new Communicate(socketClient1);
+                thread1.start();
+            } 
+            try {
+                OutputStream out2 = socketClient2.getOutputStream();
+                out2.write(msg.getBytes());
+                
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                if (!socketClient2.isClosed()) {
+                    try {
+                        socketClient2.close();
+                        
+                    } catch (IOException e1) {
+                        // TODO Auto-generated catch block  
+                    }
+                } 
+                try {
+                    socketClient2 = new Socket(TCPService2.SERVICE_IP, TCPService2.SERVICE_PORT);
+                } catch (UnknownHostException e1) {
+                } catch (IOException e1) {
+                }
+                thread2 = new Communicate(socketClient2);
+                thread2.start();
+            } 
+            try {
+                OutputStream out3 = socketClient3.getOutputStream();
+                out3.write(msg.getBytes());
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                if (!socketClient3.isClosed()) {
+                    try {
+                        socketClient3.close();
+                    } catch (IOException e1) {
+                        // TODO Auto-generated catch block  
+                    }
+                }
+                try {
+					socketClient3 = new Socket(TCPService3.SERVICE_IP, TCPService3.SERVICE_PORT);
+				} catch (UnknownHostException e1) {
+				} catch (IOException e1) {
+				}
+                thread3 = new Communicate(socketClient3);
+                thread3.start();
+            } 
         }
     }
 
@@ -67,15 +127,17 @@ public class TCPClient2 {
                             break;
                         receiveMsg.append((char)c);
                     }
-                    if (!set.contains(receiveMsg.toString())) {
-                        set.add(receiveMsg.toString());
-                        System.out.println(receiveMsg.toString());
-                        System.out.println("receive time : " + format.format(new Date()));
-                    }
+                    String receivedMsg = receiveMsg.toString();
+                        if (receivedMsg.contains("true")) {
+                            System.out.println("C1 " + receivedMsg + "receive time : " + format.format(new Date()));
+                        } else {
+                            String serverNum = receivedMsg.split(" ")[1];
+                            System.out.println("Discarded duplicate reply from " + serverNum);
+                        }
                     
                     
                 }catch (Exception e){
-                    e.printStackTrace();
+                    break;
                 }
             }
         }

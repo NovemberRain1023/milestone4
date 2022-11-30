@@ -8,7 +8,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class TCPService2 {
-    public static final String SERVICE_IP = "127.0.0.1";
+    public static final String SERVICE_IP = "192.168.73.159";
 
     public static final int SERVICE_PORT = 10103;
 
@@ -22,6 +22,8 @@ public class TCPService2 {
 
     public static Socket replica;
 
+    private static int isReady = 0;
+
     private boolean isPrimary = false;
 
 
@@ -29,6 +31,7 @@ public class TCPService2 {
         TCPService2 service = new TCPService2();
         service.buildConnect();
         service.startService();
+        isReady = 0;
         
     }
 
@@ -58,6 +61,7 @@ public class TCPService2 {
                         String myStateString = receiveMsg.substring(myStateStringBeginIndex + 9, myStateStringBeginIndex + 10);
                         primaryState = Integer.parseInt(myStateString);
                         System.out.println("Receive checkpoint! Update primary state to: " + primaryState);
+                        isReady = primaryState;
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -132,10 +136,12 @@ public class TCPService2 {
                     } else {
                         System.out.println("Received message: length " + receiveMsg.length());
                         System.out.println("Received message: " + receiveMsg.toString());
-                        messageNumber += 1;
-                        String response = " S2 " + receiveMsg.toString() + " " + isPrimary + " " + END_CHAR;
-                        OutputStream out = socket.getOutputStream();
-                        out.write(response.getBytes());
+                        if (isReady == 1) {
+                            messageNumber += 1;
+                            String response = " S2 " + receiveMsg.toString() + " " + isPrimary + " " + END_CHAR;
+                            OutputStream out = socket.getOutputStream();
+                            out.write(response.getBytes());
+                        }
                     }
                 }catch (Exception e){
                     e.printStackTrace();

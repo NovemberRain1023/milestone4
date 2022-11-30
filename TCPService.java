@@ -8,7 +8,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class TCPService {
-    public static final String SERVICE_IP = "127.0.0.1";
+    public static final String SERVICE_IP = "192.168.73.159";
 
     public static final int SERVICE_PORT_Client = 10102;
 
@@ -178,13 +178,22 @@ public class TCPService {
                          ", messageNumber: " + String.valueOf(TCPService.messageNumber) + TCPService.END_CHAR;
                     checkPointCount++;
                     messageNumber++;
-                    
+                    Thread.sleep(10000);
                     OutputStream out2 = socket.getOutputStream();
                     out2.write(msg.getBytes());
                     System.out.println(msg);
-                    Thread.sleep(5000);
+                    
                 } catch (Exception e){
                     e.printStackTrace();
+                    if (!socket.isClosed()) {
+                        try {
+                            socket.close();
+                            break;
+                        } catch (IOException e1) {
+                            // TODO Auto-generated catch block
+                            e1.printStackTrace();
+                        }
+                    }
                 }
             }
         }

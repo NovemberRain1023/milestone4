@@ -8,7 +8,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class TCPService3 {
-    public static final String SERVICE_IP = "127.0.0.1";
+    public static final String SERVICE_IP = "192.168.73.159";
 
     public static final int SERVICE_PORT = 10104;
 
@@ -24,12 +24,15 @@ public class TCPService3 {
 
     private boolean isPrimary = false;
 
+    private static int isReady;
+
 
     public static void main(String[] args) {
         TCPService3 service = new TCPService3();
         service.buildConnect();
         //service.buildConnectToServer();
         service.startService();
+        isReady = 0;
         
     }
 
@@ -59,9 +62,19 @@ public class TCPService3 {
                         String myStateString = receiveMsg.substring(myStateStringBeginIndex + 9, myStateStringBeginIndex + 10);
                         primaryState = Integer.parseInt(myStateString);
                         System.out.println("Receive checkpoint! Update primary state to: " + primaryState);
+                        isReady = primaryState;
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
+                    if (!replica.isClosed()) {
+                        try {
+                            replica.close();
+                            break;
+                        } catch (IOException e1) {
+                            // TODO Auto-generated catch block
+                            e1.printStackTrace();
+                        }
+                    }
                     // TODO: handle exception
                 }
             }
@@ -133,9 +146,12 @@ public class TCPService3 {
                         System.out.println("Received message: length " + receiveMsg.length());
                         System.out.println("Received message: " + receiveMsg.toString());
                         messageNumber += 1;
-                        String response = " S3 " + receiveMsg.toString() + " " + isPrimary + " " + END_CHAR;
-                        OutputStream out = socket.getOutputStream();
-                        out.write(response.getBytes());
+                        if (isReady == 1) {
+                            String response = " S3 " + receiveMsg.toString() + " " + isPrimary + " " + END_CHAR;
+                            OutputStream out = socket.getOutputStream();
+                            out.write(response.getBytes());
+                        }
+                        
                     }
                 }catch (Exception e){
                     e.printStackTrace();

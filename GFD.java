@@ -69,16 +69,13 @@ public class GFD {
             while(true) {
                 try {
                     StringBuilder receiveMsg = new StringBuilder();
-                    System.out.println("*******");
                     InputStream in = socket.getInputStream();
-                    System.out.println("*******1");
                     // System.out.println(in.read());
                     for (int c = in.read(); c != END_CHAR; c = in.read()) {
                         if(c ==-1)
                             break;
                         receiveMsg.append((char)c);
                     }
-                    System.out.println("*******2");
                     System.out.println("Received message: " + receiveMsg.toString());
 
                     // determine whether is a add message or delete message

@@ -2,6 +2,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
@@ -48,13 +49,64 @@ public class TCPClient {
             try {
                 OutputStream out1 = socketClient1.getOutputStream();
                 out1.write(msg.getBytes());
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                if (!socketClient1.isClosed()) {
+                    try {
+                        socketClient1.close();
+                    } catch (IOException e1) {
+                        // TODO Auto-generated catch block  
+                    }
+                }
+                try {
+                    socketClient1 = new Socket(TCPService.SERVICE_IP, TCPService.SERVICE_PORT_Client);
+                } catch (UnknownHostException e1) {
+                } catch (IOException e1) {
+                }
+                thread1 = new Communicate(socketClient1);
+                thread1.start();
+            } 
+            try {
                 OutputStream out2 = socketClient2.getOutputStream();
                 out2.write(msg.getBytes());
+                
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                if (!socketClient2.isClosed()) {
+                    try {
+                        socketClient2.close();
+                        
+                    } catch (IOException e1) {
+                        // TODO Auto-generated catch block  
+                    }
+                } 
+                try {
+                    socketClient2 = new Socket(TCPService2.SERVICE_IP, TCPService2.SERVICE_PORT);
+                } catch (UnknownHostException e1) {
+                } catch (IOException e1) {
+                }
+                thread2 = new Communicate(socketClient2);
+                thread2.start();
+            } 
+            try {
                 OutputStream out3 = socketClient3.getOutputStream();
                 out3.write(msg.getBytes());
             } catch (IOException e) {
                 // TODO Auto-generated catch block
-                e.printStackTrace();
+                if (!socketClient3.isClosed()) {
+                    try {
+                        socketClient3.close();
+                    } catch (IOException e1) {
+                        // TODO Auto-generated catch block  
+                    }
+                }
+                try {
+					socketClient3 = new Socket(TCPService3.SERVICE_IP, TCPService3.SERVICE_PORT);
+				} catch (UnknownHostException e1) {
+				} catch (IOException e1) {
+				}
+                thread3 = new Communicate(socketClient3);
+                thread3.start();
             } 
         }
     }
@@ -85,19 +137,11 @@ public class TCPClient {
                             String serverNum = receivedMsg.split(" ")[1];
                             System.out.println("Discarded duplicate reply from " + serverNum);
                         }
-                        // if (!set.contains(receiveMsg.toString())) {
-                        //     set.add(receiveMsg.toString());
-                        //     System.out.println(receiveMsg.toString());
-                        //     System.out.println("receive time : " + format.format(new Date()));
-                        // }
                     } else {
                         System.out.println("Client is null");
                     }
-                    
-                    
-                    
                 }catch (Exception e){
-                    e.printStackTrace();
+                   break;
                 }
             }
         }
